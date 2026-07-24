@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import NumberSystemConverter from './components/NumberSystemConverter';
 import CircuitBuilder from './components/CircuitBuilder';
 import LineCodingSimulator from './components/LineCodingSimulator';
-import { Cpu, Share2, Sun, Moon, Zap, Layers, Activity } from 'lucide-react';
+import SequentialLogicLab from './components/SequentialLogicLab';
+import { Cpu, Share2, Sun, Moon, Zap, Layers, Activity, Settings } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'converter' | 'circuit' | 'linecoding'>('linecoding');
+  const [activeTab, setActiveTab] = useState<'converter' | 'circuit' | 'linecoding' | 'sequential'>('sequential');
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   return (
@@ -23,11 +24,11 @@ export default function App() {
           </div>
           
           <div className="flex items-center gap-4">
-            <nav className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-md border border-slate-200 dark:border-slate-800">
+            <nav className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto hide-scrollbar">
 
               <button
                 onClick={() => setActiveTab('converter')}
-                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-medium rounded transition-colors ${
+                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
                   activeTab === 'converter' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
               >
@@ -35,8 +36,17 @@ export default function App() {
                 Converter & Logic
               </button>
               <button
+                onClick={() => setActiveTab('sequential')}
+                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                  activeTab === 'sequential' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                <Settings className="h-3.5 w-3.5" />
+                Sequential Logic
+              </button>
+              <button
                 onClick={() => setActiveTab('circuit')}
-                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-medium rounded transition-colors ${
+                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
                   activeTab === 'circuit' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
               >
@@ -45,7 +55,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setActiveTab('linecoding')}
-                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-medium rounded transition-colors ${
+                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
                   activeTab === 'linecoding' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
               >
@@ -67,6 +77,7 @@ export default function App() {
         <main className="flex-1 max-w-7xl w-full mx-auto p-6 overflow-hidden flex flex-col">
           <div className="flex-1 min-h-0 w-full transition-all duration-300 relative overflow-hidden">
                         {activeTab === 'converter' && <NumberSystemConverter />}
+            {activeTab === 'sequential' && <SequentialLogicLab />}
             {activeTab === 'circuit' && <CircuitBuilder />}
             {activeTab === 'linecoding' && <LineCodingSimulator />}
           </div>
