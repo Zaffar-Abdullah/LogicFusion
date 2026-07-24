@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import NumberSystemConverter from './components/NumberSystemConverter';
 import CircuitBuilder from './components/CircuitBuilder';
-import { Cpu, Share2, Sun, Moon, Zap, Layers } from 'lucide-react';
+import LineCodingSimulator from './components/LineCodingSimulator';
+import { Cpu, Share2, Sun, Moon, Zap, Layers, Activity } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'converter' | 'circuit'>('circuit');
+  const [activeTab, setActiveTab] = useState<'converter' | 'circuit' | 'linecoding'>('linecoding');
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   return (
@@ -42,6 +43,15 @@ export default function App() {
                 <Cpu className="h-3.5 w-3.5" />
                 Circuit Builder
               </button>
+              <button
+                onClick={() => setActiveTab('linecoding')}
+                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-medium rounded transition-colors ${
+                  activeTab === 'linecoding' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                <Activity className="h-3.5 w-3.5" />
+                Line Coding
+              </button>
             </nav>
             
             <button 
@@ -58,6 +68,7 @@ export default function App() {
           <div className="flex-1 min-h-0 w-full transition-all duration-300 relative overflow-hidden">
                         {activeTab === 'converter' && <NumberSystemConverter />}
             {activeTab === 'circuit' && <CircuitBuilder />}
+            {activeTab === 'linecoding' && <LineCodingSimulator />}
           </div>
         </main>
       </div>
