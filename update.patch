@@ -1,0 +1,39 @@
+--- src/components/ALUVisualizer.tsx
++++ src/components/ALUVisualizer.tsx
+@@ -43,15 +43,7 @@
+       </div>
+ 
+-      <div className="p-5 flex-1 relative flex flex-col items-center justify-center min-h-[300px]">
+-        
+-        {/* State Information */}
+-        <div className="absolute top-4 left-4 bg-slate-950/80 p-3 border border-slate-800 rounded z-10 max-w-[200px]">
+-          <div className="text-[10px] text-indigo-400 font-bold mb-1 uppercase tracking-wider">Step {currentStep + 1} of {steps.length}</div>
+-          <div className="text-sm font-bold text-white mb-2">{step.phase}</div>
+-          <div className="text-xs text-slate-400 leading-tight">{step.description}</div>
+-        </div>
++      <div className="p-5 flex-1 flex flex-col items-center justify-center min-h-[320px]">
+ 
+         {/* Visual Logic Board */}
+-        <div className="w-full max-w-[600px] h-[300px] relative border border-slate-800 rounded bg-slate-950/50 shadow-inner flex items-center justify-center">
++        <div className="w-full h-full relative border border-slate-200 dark:border-slate-800 rounded bg-slate-50 dark:bg-slate-950/50 shadow-inner flex items-center justify-center overflow-hidden">
+           {isBitwise ? (
+             <div className="relative w-full h-full">
+@@ -144,4 +136,17 @@
+         </div>
+       </div>
++
++      {/* Simulation Log */}
++      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 p-4 max-h-[250px] overflow-y-auto flex flex-col gap-2 custom-scrollbar">
++        {steps.slice(0, currentStep + 1).map((s, idx) => (
++          <div key={s.id} className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-lg flex items-start gap-4 animate-in slide-in-from-left-4 fade-in duration-300">
++            <div className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider shrink-0 mt-0.5 w-16">
++              Step {idx + 1}
++            </div>
++            <div className="flex-1">
++              <div className="text-sm font-bold text-slate-800 dark:text-white mb-1">{s.phase}</div>
++              <div className="text-xs text-slate-600 dark:text-slate-400">{s.description}</div>
++            </div>
++          </div>
++        ))}
++      </div>
+     </div>

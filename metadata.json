@@ -1,0 +1,8 @@
+{
+  "name": "LogicFusion",
+  "description": "A web-based Digital Logic Simulator featuring arithmetic operations, Boolean simplification, and a visual logic gate circuit builder.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,10 @@
+--- src/components/BooleanSimplifier.tsx
++++ src/components/BooleanSimplifier.tsx
+@@ -149,6 +149,7 @@
+               </tbody>
+             </table>
+           </div>
++        </div>
+         </div>
+       </div>
+     </div>
