@@ -183,6 +183,55 @@ const JunctionNode = ({ data, selected }: any) => {
 let idCounter = 0;
 const getId = () => `node_${idCounter++}`;
 
+const ICNode = ({ data, id }: any) => {
+  const { icType } = data;
+  
+  let inputs: { id: string, label: string }[] = [];
+  let outputs: { id: string, label: string }[] = [];
+  let title = '';
+  
+  if (icType === 'HALF_ADDER') {
+    title = 'Half Adder';
+    inputs = [{ id: 'A', label: 'A' }, { id: 'B', label: 'B' }];
+    outputs = [{ id: 'S', label: 'S' }, { id: 'C', label: 'C' }];
+  } else if (icType === 'FULL_ADDER') {
+    title = 'Full Adder';
+    inputs = [{ id: 'A', label: 'A' }, { id: 'B', label: 'B' }, { id: 'Cin', label: 'Cin' }];
+    outputs = [{ id: 'S', label: 'S' }, { id: 'Cout', label: 'Cout' }];
+  } else if (icType === 'MUX_2_1') {
+    title = '2:1 MUX';
+    inputs = [{ id: 'D0', label: 'D0' }, { id: 'D1', label: 'D1' }, { id: 'Sel', label: 'Sel' }];
+    outputs = [{ id: 'Y', label: 'Y' }];
+  }
+  
+  return (
+    <div className="bg-slate-50 dark:bg-slate-800 border-2 border-fuchsia-500/50 rounded shadow-sm min-w-[100px] text-center flex flex-col transition-all">
+      <div className="bg-fuchsia-100 dark:bg-fuchsia-900/80 py-1 text-xs font-bold text-fuchsia-700 dark:text-fuchsia-300 border-b border-fuchsia-200 dark:border-fuchsia-700 flex justify-center items-center px-1">
+        <span>{title}</span>
+      </div>
+      <div className="p-2 relative flex bg-white dark:bg-slate-800 transition-all min-h-[60px] justify-between">
+        <div className="flex flex-col gap-2">
+          {inputs.map((inp) => (
+             <div key={inp.id} className="relative flex items-center h-4">
+                <Handle type="target" position={Position.Left} id={inp.id} className="w-1.5 h-1.5 bg-slate-400 border-none rounded-none -left-2" />
+                <span className="text-[8px] font-bold text-slate-500 ml-1">{inp.label}</span>
+             </div>
+          ))}
+        </div>
+        <div className="flex flex-col gap-2 items-end justify-between">
+          {outputs.map((out) => (
+             <div key={out.id} className="relative flex items-center h-4 justify-end">
+                <span className={`text-[8px] font-bold mr-1 ${data[out.id] ? 'text-emerald-500' : 'text-slate-500'}`}>{out.label}</span>
+                <Handle type="source" position={Position.Right} id={out.id} className={`w-1.5 h-1.5 border-none rounded-none -right-2 ${data[out.id] ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+             </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 // Custom Wire Edge with branch & delete
 const CustomWireEdge = ({
   id,
@@ -291,6 +340,7 @@ const nodeTypes = {
   clockNode: ClockNode,
   junctionNode: JunctionNode,
   flipFlopNode: FlipFlopNode,
+  icNode: ICNode,
 };
 
 const edgeTypes = {
@@ -301,6 +351,68 @@ const TICK_RATE_MS = 100; // 10 ticks per second
 const MAX_HISTORY = 100;
 const GATE_DELAY_TICKS = 2; // 200ms propagation delay
 const CLOCK_HALF_PERIOD_TICKS = 5; // 500ms high, 500ms low (1Hz)
+
+const onDragStart = (event: React.DragEvent, nodeType: string, nodeData: any) => {
+  event.dataTransfer.setData('application/reactflow', JSON.stringify({ type: nodeType, data: nodeData }));
+  event.dataTransfer.effectAllowed = 'move';
+};
+
+const LibrarySidebar = () => {
+  return (
+    <div className="w-48 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col shadow-sm overflow-y-auto">
+      <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-3 border-b border-slate-200 dark:border-slate-800 pb-2">Library</h3>
+      
+      <div className="flex flex-col gap-3">
+        <div>
+          <div className="text-[10px] text-slate-500 font-bold tracking-wider mb-2">Flip-Flops</div>
+          <div className="grid grid-cols-2 gap-2">
+            {['SR', 'JK', 'D', 'T'].map(ff => (
+              <div 
+                key={ff}
+                draggable
+                onDragStart={(e) => onDragStart(e, 'flipFlopNode', { type: ff })}
+                className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-2 py-1.5 rounded text-xs font-medium cursor-grab hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-center transition-colors shadow-sm"
+              >
+                {ff}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div>
+          <div className="text-[10px] text-slate-500 font-bold tracking-wider mb-2">Sub-Circuits</div>
+          <div className="flex flex-col gap-2">
+            <div 
+              draggable
+              onDragStart={(e) => onDragStart(e, 'icNode', { icType: 'HALF_ADDER' })}
+              className="bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-400 border border-fuchsia-200 dark:border-fuchsia-500/30 px-3 py-2 rounded text-xs font-medium cursor-grab hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/40 transition-colors shadow-sm text-center"
+            >
+              Half Adder
+            </div>
+            <div 
+              draggable
+              onDragStart={(e) => onDragStart(e, 'icNode', { icType: 'FULL_ADDER' })}
+              className="bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-400 border border-fuchsia-200 dark:border-fuchsia-500/30 px-3 py-2 rounded text-xs font-medium cursor-grab hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/40 transition-colors shadow-sm text-center"
+            >
+              Full Adder
+            </div>
+            <div 
+              draggable
+              onDragStart={(e) => onDragStart(e, 'icNode', { icType: 'MUX_2_1' })}
+              className="bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-400 border border-fuchsia-200 dark:border-fuchsia-500/30 px-3 py-2 rounded text-xs font-medium cursor-grab hover:bg-fuchsia-100 dark:hover:bg-fuchsia-900/40 transition-colors shadow-sm text-center"
+            >
+              Multiplexer 2:1
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-4 p-2 bg-slate-100 dark:bg-slate-800/50 rounded border border-slate-200 dark:border-slate-700 text-[10px] text-slate-500 leading-tight">
+          Drag and drop items from this library into the canvas.
+        </div>
+      </div>
+    </div>
+  );
+};
 
 function CircuitBuilderInner() {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -410,6 +522,44 @@ function CircuitBuilderInner() {
     });
   }, [reactFlow]);
 
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const onDrop = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+
+    const typeDataStr = event.dataTransfer.getData('application/reactflow');
+    if (!typeDataStr) return;
+    const { type, data } = JSON.parse(typeDataStr);
+
+    const position = reactFlow.screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+
+    const newNode: Node = {
+      id: getId(),
+      type,
+      position,
+      data: {
+         ...data,
+         value: false,
+      }
+    };
+    
+    if (type === 'gateNode') {
+        newNode.data.inputCount = data.type === 'NOT' ? 1 : 2;
+        newNode.data.updateInputs = updateGateInputs;
+    }
+    if (type === 'inputNode') {
+        newNode.data.toggle = toggleInput;
+    }
+
+    setNodes((nds) => nds.concat(newNode));
+  }, [reactFlow, toggleInput, updateGateInputs, setNodes]);
+
   const addNode = (type: string, nodeType: string = 'gateNode') => {
     const newNode: Node = {
       id: getId(),
@@ -437,6 +587,9 @@ function CircuitBuilderInner() {
         const sourceNode = nodeMap.get(edge.source);
         if (sourceNode?.type === 'flipFlopNode') {
            return edge.sourceHandle === 'qbar' ? sourceNode.data.qbar : sourceNode.data.q;
+        }
+        if (sourceNode?.type === 'icNode') {
+           return sourceNode.data[edge.sourceHandle || ''] || false;
         }
         return sourceNode?.data?.value || false;
       };
@@ -529,6 +682,44 @@ function CircuitBuilderInner() {
              nodesChanged = true;
           }
         }
+        // 5. IC Nodes (Sub-circuits)
+        else if (node.type === 'icNode') {
+          const type = node.data.icType;
+          let targetVals: any = {};
+          
+          if (type === 'HALF_ADDER') {
+             const a = getSourceValue(node.id, 'A');
+             const b = getSourceValue(node.id, 'B');
+             targetVals.S = a !== b;
+             targetVals.C = a && b;
+          } else if (type === 'FULL_ADDER') {
+             const a = getSourceValue(node.id, 'A');
+             const b = getSourceValue(node.id, 'B');
+             const cin = getSourceValue(node.id, 'Cin');
+             const s1 = a !== b;
+             targetVals.S = s1 !== cin;
+             targetVals.Cout = (a && b) || (cin && s1);
+          } else if (type === 'MUX_2_1') {
+             const d0 = getSourceValue(node.id, 'D0');
+             const d1 = getSourceValue(node.id, 'D1');
+             const sel = getSourceValue(node.id, 'Sel');
+             targetVals.Y = sel ? d1 : d0;
+          }
+          
+          let changed = false;
+          for (const key in targetVals) {
+             if (node.data[key] !== targetVals[key]) {
+                changed = true;
+                break;
+             }
+          }
+          
+          if (changed) {
+             currentNodes[index] = { ...node, data: { ...node.data, ...targetVals } };
+             nodeMap.set(node.id, currentNodes[index]);
+             nodesChanged = true;
+          }
+        }
       });
 
       // 4. Update History for Waveforms
@@ -586,59 +777,53 @@ function CircuitBuilderInner() {
       </div>
       
       {/* Circuit Canvas */}
-      <div className="flex-1 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-950 relative min-h-[400px]">
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-4 py-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-500 dark:text-slate-400 pointer-events-none">
-          Double-click any wire to create a branch junction
+      <div className="flex-1 flex gap-4 min-h-[400px]">
+        <LibrarySidebar />
+        <div className="flex-1 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-950 relative">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-4 py-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-500 dark:text-slate-400 pointer-events-none">
+            Double-click any wire to create a branch junction
+          </div>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onReconnect={onReconnect}
+            onEdgeDoubleClick={onEdgeDoubleClick}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            fitView
+            className="bg-slate-50 dark:bg-slate-950"
+            defaultEdgeOptions={{ 
+              style: { stroke: '#64748b', strokeWidth: 2 },
+              type: 'custom',
+              interactionWidth: 20
+            }}
+          >
+            <Background color="#94a3b8" gap={20} size={1} />
+            <Controls className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 fill-slate-700 dark:fill-slate-300" />
+            <Panel position="top-left" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-lg shadow-sm flex flex-col gap-2 max-h-full overflow-y-auto m-2">
+              <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Signals</div>
+              <button onClick={() => addNode('INPUT', 'inputNode')} className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 px-3 py-1.5 rounded text-xs font-medium hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">Input Switch</button>
+              <button onClick={() => addNode('CLOCK', 'clockNode')} className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30 px-3 py-1.5 rounded text-xs font-medium hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors flex items-center justify-center gap-1"><Clock className="w-3 h-3"/> Clock (1Hz)</button>
+              <button onClick={() => addNode('OUTPUT', 'outputNode')} className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-3 py-1.5 rounded text-xs font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors">Output Lamp</button>
+              <div className="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
+              <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Gates</div>
+              {['AND', 'OR', 'NOT', 'NAND', 'NOR', 'XOR', 'XNOR'].map(gate => (
+                <button 
+                  key={gate}
+                  onClick={() => addNode(gate)} 
+                  className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  {gate}
+                </button>
+              ))}
+            </Panel>
+          </ReactFlow>
         </div>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onReconnect={onReconnect}
-          onEdgeDoubleClick={onEdgeDoubleClick}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          fitView
-          className="bg-slate-50 dark:bg-slate-950"
-          defaultEdgeOptions={{ 
-            style: { stroke: '#64748b', strokeWidth: 2 },
-            type: 'custom',
-            interactionWidth: 20
-          }}
-        >
-          <Background color="#94a3b8" gap={20} size={1} />
-          <Controls className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 fill-slate-700 dark:fill-slate-300" />
-          <Panel position="top-left" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-lg shadow-sm flex flex-col gap-2 max-h-full overflow-y-auto m-2">
-            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Signals</div>
-            <button onClick={() => addNode('INPUT', 'inputNode')} className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 px-3 py-1.5 rounded text-xs font-medium hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">Input Switch</button>
-            <button onClick={() => addNode('CLOCK', 'clockNode')} className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30 px-3 py-1.5 rounded text-xs font-medium hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors flex items-center justify-center gap-1"><Clock className="w-3 h-3"/> Clock (1Hz)</button>
-            <button onClick={() => addNode('OUTPUT', 'outputNode')} className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-3 py-1.5 rounded text-xs font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors">Output Lamp</button>
-            <div className="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
-            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Gates</div>
-            {['AND', 'OR', 'NOT', 'NAND', 'NOR', 'XOR', 'XNOR'].map(gate => (
-              <button 
-                key={gate}
-                onClick={() => addNode(gate)} 
-                className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-              >
-                {gate}
-              </button>
-            ))}
-            <div className="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
-            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Flip-Flops</div>
-            {['SR', 'JK', 'D', 'T'].map(ff => (
-              <button 
-                key={ff}
-                onClick={() => addNode(ff, 'flipFlopNode')} 
-                className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 px-3 py-1.5 rounded text-xs font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
-              >
-                {ff} Flip-Flop
-              </button>
-            ))}
-          </Panel>
-        </ReactFlow>
       </div>
 
       {/* Waveform Visualization Panel */}
