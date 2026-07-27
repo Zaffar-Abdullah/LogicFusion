@@ -91,6 +91,98 @@ export default function SeqFlipFlops() {
 
   const getInternalImage = () => {
     // Detailed SVG block diagram for Flip-Flop internal structures
+    if (ffType === 'T') {
+      const tVal = input1;
+      const clkVal = clock;
+      const qVal = state.Q;
+      const qbarVal = state.Qbar;
+      
+      const n1Val = !(tVal && clkVal && qbarVal);
+      const n2Val = !(tVal && clkVal && qVal);
+
+      return (
+        <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg w-full overflow-hidden">
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Internal Gate-Level Structure</h4>
+          <div className="relative w-full max-w-[500px] h-[300px]">
+            <svg width="100%" height="100%" viewBox="0 0 500 300" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <g id="t-nand-gate">
+                  <path d="M 0 0 L 20 0 A 20 20 0 0 1 20 40 L 0 40 Z" fill="#bbf7d0" stroke="#15803d" strokeWidth="2" className="dark:fill-green-900/40 dark:stroke-green-600" />
+                  <circle cx="44" cy="20" r="4" fill="white" stroke="#15803d" strokeWidth="2" className="dark:fill-slate-950 dark:stroke-green-600" />
+                </g>
+              </defs>
+
+              {/* T Input label */}
+              <text x="15" y="85" className="text-sm font-bold fill-red-600 dark:fill-red-400 font-mono">T</text>
+              <text x="30" y="70" className="text-[10px] font-bold fill-red-600 dark:fill-red-400 font-mono">(J)</text>
+              <text x="30" y="240" className="text-[10px] font-bold fill-red-600 dark:fill-red-400 font-mono">(K)</text>
+
+              {/* T wire to top NAND */}
+              <path d="M 40 80 L 150 80" fill="none" stroke={tVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              {/* T branch to bottom NAND */}
+              <path d="M 70 80 L 70 220 L 150 220" fill="none" stroke={tVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <circle cx="70" cy="80" r="3" fill={tVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              
+              {/* CLK label */}
+              <text x="10" y="155" className="text-sm font-bold fill-red-600 dark:fill-red-400 font-mono">Clk</text>
+              
+              {/* CLK wire */}
+              <path d="M 40 150 L 100 150" fill="none" stroke={clkVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              {/* CLK to top NAND */}
+              <path d="M 100 150 L 100 90 L 150 90" fill="none" stroke={clkVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <circle cx="100" cy="150" r="3" fill={clkVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              {/* CLK to bottom NAND */}
+              <path d="M 100 150 L 100 210 L 150 210" fill="none" stroke={clkVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+
+              {/* Feedback Q' to Top NAND */}
+              <path d="M 410 210 L 430 210 L 430 30 L 120 30 L 120 100 L 150 100" fill="none" stroke={qbarVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <circle cx="410" cy="210" r="3" fill={qbarVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              <polygon points="128,96 128,104 120,100" fill={qbarVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+
+              {/* Feedback Q to Bottom NAND */}
+              <path d="M 410 90 L 420 90 L 420 260 L 130 260 L 130 200 L 150 200" fill="none" stroke={qVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <circle cx="410" cy="90" r="3" fill={qVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              <polygon points="138,196 138,204 130,200" fill={qVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+
+              {/* Top-Left NAND1 */}
+              <use href="#t-nand-gate" x="150" y="70" />
+              
+              {/* Bottom-Left NAND2 */}
+              <use href="#t-nand-gate" x="150" y="190" />
+
+              {/* Wire N1 to NAND3 */}
+              <path d="M 194 90 L 230 90 L 230 80 L 280 80" fill="none" stroke={n1Val ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+
+              {/* Wire N2 to NAND4 */}
+              <path d="M 194 210 L 230 210 L 230 220 L 280 220" fill="none" stroke={n2Val ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+
+              {/* Top-Right NAND3 */}
+              <use href="#t-nand-gate" x="280" y="70" />
+              
+              {/* Bottom-Right NAND4 */}
+              <use href="#t-nand-gate" x="280" y="190" />
+
+              {/* Cross coupling SR Latch */}
+              <path d="M 324 90 L 350 90 L 350 140 L 250 160 L 250 200 L 280 200" fill="none" stroke={qVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <circle cx="350" cy="90" r="3" fill={qVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              
+              <path d="M 324 210 L 360 210 L 360 160 L 260 140 L 260 100 L 280 100" fill="none" stroke={qbarVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <circle cx="360" cy="210" r="3" fill={qbarVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+
+              {/* Output Q */}
+              <path d="M 324 90 L 460 90" fill="none" stroke={qVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <text x="470" y="95" className="text-sm font-bold fill-red-600 dark:fill-red-400 font-mono">Q</text>
+
+              {/* Output Q' */}
+              <path d="M 324 210 L 460 210" fill="none" stroke={qbarVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <text x="470" y="215" className="text-sm font-bold fill-red-600 dark:fill-red-400 font-mono">Q̅</text>
+
+            </svg>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg w-full overflow-hidden">
         <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Internal Gate-Level Structure</h4>
