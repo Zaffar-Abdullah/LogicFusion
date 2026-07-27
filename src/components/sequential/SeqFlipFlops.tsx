@@ -14,9 +14,25 @@ export default function SeqFlipFlops() {
   const [autoClock, setAutoClock] = useState(false);
   
   const [history, setHistory] = useState<{t: number, clk: boolean, i1: boolean, i2: boolean, q: boolean}[]>([]);
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const timeRef = useRef(0);
   const maxHistory = 100;
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const index = Math.floor(x / 30);
+    if (index >= 0 && index < history.length) {
+      setHoverIndex(index);
+    } else {
+      setHoverIndex(null);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoverIndex(null);
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -90,20 +106,126 @@ export default function SeqFlipFlops() {
   };
 
   const getInternalImage = () => {
+    const wireProps = (active: boolean) => ({
+      fill: "none",
+      stroke: active ? "#ef4444" : "#64748b",
+      strokeWidth: active ? 3 : 2,
+      style: { filter: active ? 'drop-shadow(0 0 3px rgba(239, 68, 68, 0.6))' : 'none' },
+      className: "transition-all duration-300 ease-in-out"
+    });
+    
+    const dotProps = (active: boolean) => ({
+      fill: active ? "#ef4444" : "#64748b",
+      style: { filter: active ? 'drop-shadow(0 0 3px rgba(239, 68, 68, 0.6))' : 'none' },
+      className: "transition-all duration-300 ease-in-out"
+    });
+
+    const signalLabelClass = "text-sm font-bold fill-slate-800 dark:fill-slate-200 font-mono";
+
     // Detailed SVG block diagram for Flip-Flop internal structures
-    if (ffType === 'T') {
-      const tVal = input1;
+    if (ffType === 'D' || ffType === 'SR') {
+      const isD = ffType === 'D';
+      const topIn = input1;
+      const botIn = isD ? !input1 : input2;
       const clkVal = clock;
       const qVal = state.Q;
       const qbarVal = state.Qbar;
       
-      const n1Val = !(tVal && clkVal && qbarVal);
-      const n2Val = !(tVal && clkVal && qVal);
+      const n1Val = !(topIn && clkVal);
+      const n2Val = !(botIn && clkVal);
 
       return (
-        <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg w-full overflow-hidden">
-          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Internal Gate-Level Structure</h4>
-          <div className="relative w-full max-w-[500px] h-[300px]">
+        <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg w-full overflow-hidden shadow-inner relative">
+          <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.02]" style={{ backgroundImage: 'linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 z-10 relative bg-slate-50 dark:bg-slate-950 px-2 rounded">Logic Gate View</h4>
+          <div className="relative w-full max-w-[500px] h-[300px] z-10">
+            <svg width="100%" height="100%" viewBox="0 0 500 300" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <g id="t-nand-gate">
+                  <path d="M 0 0 L 20 0 A 20 20 0 0 1 20 40 L 0 40 Z" fill="#bbf7d0" stroke="#15803d" strokeWidth="2" className="dark:fill-green-900/40 dark:stroke-green-600" />
+                  <circle cx="44" cy="20" r="4" fill="white" stroke="#15803d" strokeWidth="2" className="dark:fill-slate-950 dark:stroke-green-600" />
+                </g>
+                <g id="t-not-gate">
+                  <path d="M 0 0 L 20 15 L 0 30 Z" fill="#bfdbfe" stroke="#1d4ed8" strokeWidth="2" className="dark:fill-blue-900/40 dark:stroke-blue-600" />
+                  <circle cx="26" cy="15" r="4" fill="white" stroke="#1d4ed8" strokeWidth="2" className="dark:fill-slate-950 dark:stroke-blue-600" />
+                </g>
+              </defs>
+
+              {/* Background regions */}
+              <rect x="240" y="35" width="160" height="220" fill="none" stroke="#eab308" strokeWidth="1.5" strokeDasharray="4 4" rx="8" className="dark:stroke-yellow-600/50" />
+              <rect x="240" y="35" width="160" height="220" fill="#fef08a" fillOpacity="0.05" stroke="none" rx="8" className="dark:fill-yellow-900/10" />
+              <rect x="280" y="27" width="80" height="16" fill="#fef08a" rx="4" className="dark:fill-yellow-900" />
+              <text x="320" y="38" textAnchor="middle" className="text-[10px] font-bold fill-yellow-800 dark:fill-yellow-400 font-mono tracking-wider">NAND Latch</text>
+
+              {/* Input labels */}
+              <text x="15" y="85" className={signalLabelClass}>{isD ? 'D' : 'S'}</text>
+              <text x="10" y="155" className={signalLabelClass}>EN</text>
+              <text x="10" y="170" className="text-[10px] font-bold fill-slate-500 font-mono">(CLK)</text>
+              {!isD && <text x="15" y="210" className={signalLabelClass}>R</text>}
+
+              {/* Wires */}
+              <path d="M 40 80 L 150 80" {...wireProps(topIn)} />
+              
+              {isD ? (
+                <>
+                  <path d="M 70 80 L 70 205 L 85 205" {...wireProps(topIn)} />
+                  <circle cx="70" cy="80" r="3" {...dotProps(topIn)} />
+                  <use href="#t-not-gate" x="85" y="190" />
+                  <path d="M 115 205 L 150 205" {...wireProps(botIn)} />
+                </>
+              ) : (
+                <path d="M 40 205 L 150 205" {...wireProps(botIn)} />
+              )}
+
+              <path d="M 40 150 L 100 150" {...wireProps(clkVal)} />
+              <path d="M 100 150 L 100 100 L 150 100" {...wireProps(clkVal)} />
+              <circle cx="100" cy="150" r="3" {...dotProps(clkVal)} />
+              <path d="M 100 150 L 100 185 L 150 185" {...wireProps(clkVal)} />
+
+              <use href="#t-nand-gate" x="150" y="70" />
+              <use href="#t-nand-gate" x="150" y="175" />
+
+              <path d="M 194 90 L 230 90 L 230 80 L 280 80" {...wireProps(n1Val)} />
+              <text x="210" y="70" className="text-[10px] font-bold fill-slate-500 dark:fill-slate-400 font-mono">SET'</text>
+              <path d="M 194 195 L 230 195 L 230 205 L 280 205" {...wireProps(n2Val)} />
+              <text x="210" y="220" className="text-[10px] font-bold fill-slate-500 dark:fill-slate-400 font-mono">RESET'</text>
+
+              <use href="#t-nand-gate" x="280" y="70" />
+              <use href="#t-nand-gate" x="280" y="175" />
+
+              <path d="M 324 90 L 350 90 L 350 140 L 250 160 L 250 185 L 280 185" {...wireProps(qVal)} />
+              <circle cx="350" cy="90" r="3" {...dotProps(qVal)} />
+              
+              <path d="M 324 195 L 360 195 L 360 150 L 260 130 L 260 100 L 280 100" {...wireProps(qbarVal)} />
+              <circle cx="360" cy="195" r="3" {...dotProps(qbarVal)} />
+
+              <path d="M 324 90 L 460 90" {...wireProps(qVal)} />
+              <text x="470" y="95" className={signalLabelClass}>Q</text>
+              <path d="M 324 195 L 460 195" {...wireProps(qbarVal)} />
+              <text x="470" y="200" className={signalLabelClass}>Q̅</text>
+
+            </svg>
+          </div>
+        </div>
+      );
+    }
+    
+    if (ffType === 'T' || ffType === 'JK') {
+      const isT = ffType === 'T';
+      const jVal = input1;
+      const kVal = isT ? input1 : input2;
+      const clkVal = clock;
+      const qVal = state.Q;
+      const qbarVal = state.Qbar;
+      
+      const n1Val = !(jVal && clkVal && qbarVal);
+      const n2Val = !(kVal && clkVal && qVal);
+
+      return (
+        <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg w-full overflow-hidden shadow-inner relative">
+          <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.02]" style={{ backgroundImage: 'linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 z-10 relative bg-slate-50 dark:bg-slate-950 px-2 rounded">Logic Gate View</h4>
+          <div className="relative w-full max-w-[500px] h-[300px] z-10">
             <svg width="100%" height="100%" viewBox="0 0 500 300" preserveAspectRatio="xMidYMid meet">
               <defs>
                 <g id="t-nand-gate">
@@ -112,70 +234,64 @@ export default function SeqFlipFlops() {
                 </g>
               </defs>
 
-              {/* T Input label */}
-              <text x="15" y="85" className="text-sm font-bold fill-red-600 dark:fill-red-400 font-mono">T</text>
-              <text x="30" y="70" className="text-[10px] font-bold fill-red-600 dark:fill-red-400 font-mono">(J)</text>
-              <text x="30" y="240" className="text-[10px] font-bold fill-red-600 dark:fill-red-400 font-mono">(K)</text>
-
-              {/* T wire to top NAND */}
-              <path d="M 40 80 L 150 80" fill="none" stroke={tVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              {/* T branch to bottom NAND */}
-              <path d="M 70 80 L 70 220 L 150 220" fill="none" stroke={tVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              <circle cx="70" cy="80" r="3" fill={tVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              {/* Background regions */}
+              <rect x="240" y="35" width="160" height="220" fill="none" stroke="#eab308" strokeWidth="1.5" strokeDasharray="4 4" rx="8" className="dark:stroke-yellow-600/50" />
+              <rect x="240" y="35" width="160" height="220" fill="#fef08a" fillOpacity="0.05" stroke="none" rx="8" className="dark:fill-yellow-900/10" />
+              <rect x="280" y="27" width="80" height="16" fill="#fef08a" rx="4" className="dark:fill-yellow-900" />
+              <text x="320" y="38" textAnchor="middle" className="text-[10px] font-bold fill-yellow-800 dark:fill-yellow-400 font-mono tracking-wider">NAND Latch</text>
               
-              {/* CLK label */}
-              <text x="10" y="155" className="text-sm font-bold fill-red-600 dark:fill-red-400 font-mono">Clk</text>
+              <rect x="140" y="35" width="80" height="220" fill="none" stroke="#818cf8" strokeWidth="1.5" strokeDasharray="4 4" rx="8" className="dark:stroke-indigo-600/50" />
+              <rect x="140" y="35" width="80" height="220" fill="#e0e7ff" fillOpacity="0.05" stroke="none" rx="8" className="dark:fill-indigo-900/10" />
+              <rect x="155" y="27" width="50" height="16" fill="#e0e7ff" rx="4" className="dark:fill-indigo-900" />
+              <text x="180" y="38" textAnchor="middle" className="text-[10px] font-bold fill-indigo-800 dark:fill-indigo-400 font-mono tracking-wider">Steering</text>
+
+              <text x="15" y="85" className={signalLabelClass}>{isT ? 'T' : 'J'}</text>
+              {!isT && <text x="15" y="225" className={signalLabelClass}>K</text>}
+
+              <path d="M 40 80 L 150 80" {...wireProps(jVal)} />
+              {isT ? (
+                <>
+                  <path d="M 70 80 L 70 220 L 150 220" {...wireProps(jVal)} />
+                  <circle cx="70" cy="80" r="3" {...dotProps(jVal)} />
+                </>
+              ) : (
+                <path d="M 40 220 L 150 220" {...wireProps(kVal)} />
+              )}
               
-              {/* CLK wire */}
-              <path d="M 40 150 L 100 150" fill="none" stroke={clkVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              {/* CLK to top NAND */}
-              <path d="M 100 150 L 100 90 L 150 90" fill="none" stroke={clkVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              <circle cx="100" cy="150" r="3" fill={clkVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
-              {/* CLK to bottom NAND */}
-              <path d="M 100 150 L 100 210 L 150 210" fill="none" stroke={clkVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <text x="10" y="155" className={signalLabelClass}>Clk</text>
+              <path d="M 40 150 L 100 150" {...wireProps(clkVal)} />
+              <path d="M 100 150 L 100 90 L 150 90" {...wireProps(clkVal)} />
+              <circle cx="100" cy="150" r="3" {...dotProps(clkVal)} />
+              <path d="M 100 150 L 100 210 L 150 210" {...wireProps(clkVal)} />
 
-              {/* Feedback Q' to Top NAND */}
-              <path d="M 410 210 L 430 210 L 430 30 L 120 30 L 120 100 L 150 100" fill="none" stroke={qbarVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              <circle cx="410" cy="210" r="3" fill={qbarVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
-              <polygon points="128,96 128,104 120,100" fill={qbarVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              <path d="M 410 210 L 430 210 L 430 45 L 120 45 L 120 100 L 150 100" {...wireProps(qbarVal)} />
+              <circle cx="410" cy="210" r="3" {...dotProps(qbarVal)} />
+              <polygon points="128,96 128,104 120,100" {...dotProps(qbarVal)} />
 
-              {/* Feedback Q to Bottom NAND */}
-              <path d="M 410 90 L 420 90 L 420 260 L 130 260 L 130 200 L 150 200" fill="none" stroke={qVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              <circle cx="410" cy="90" r="3" fill={qVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
-              <polygon points="138,196 138,204 130,200" fill={qVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              <path d="M 410 90 L 420 90 L 420 245 L 130 245 L 130 200 L 150 200" {...wireProps(qVal)} />
+              <circle cx="410" cy="90" r="3" {...dotProps(qVal)} />
+              <polygon points="138,196 138,204 130,200" {...dotProps(qVal)} />
 
-              {/* Top-Left NAND1 */}
               <use href="#t-nand-gate" x="150" y="70" />
-              
-              {/* Bottom-Left NAND2 */}
               <use href="#t-nand-gate" x="150" y="190" />
 
-              {/* Wire N1 to NAND3 */}
-              <path d="M 194 90 L 230 90 L 230 80 L 280 80" fill="none" stroke={n1Val ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+              <path d="M 194 90 L 230 90 L 230 80 L 280 80" {...wireProps(n1Val)} />
+              <path d="M 194 210 L 230 210 L 230 220 L 280 220" {...wireProps(n2Val)} />
 
-              {/* Wire N2 to NAND4 */}
-              <path d="M 194 210 L 230 210 L 230 220 L 280 220" fill="none" stroke={n2Val ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-
-              {/* Top-Right NAND3 */}
               <use href="#t-nand-gate" x="280" y="70" />
-              
-              {/* Bottom-Right NAND4 */}
               <use href="#t-nand-gate" x="280" y="190" />
 
-              {/* Cross coupling SR Latch */}
-              <path d="M 324 90 L 350 90 L 350 140 L 250 160 L 250 200 L 280 200" fill="none" stroke={qVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              <circle cx="350" cy="90" r="3" fill={qVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              <path d="M 324 90 L 350 90 L 350 140 L 250 160 L 250 200 L 280 200" {...wireProps(qVal)} />
+              <circle cx="350" cy="90" r="3" {...dotProps(qVal)} />
               
-              <path d="M 324 210 L 360 210 L 360 160 L 260 140 L 260 100 L 280 100" fill="none" stroke={qbarVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              <circle cx="360" cy="210" r="3" fill={qbarVal ? "#ef4444" : "#94a3b8"} className="transition-colors duration-300" />
+              <path d="M 324 210 L 360 210 L 360 160 L 260 140 L 260 100 L 280 100" {...wireProps(qbarVal)} />
+              <circle cx="360" cy="210" r="3" {...dotProps(qbarVal)} />
 
-              {/* Output Q */}
-              <path d="M 324 90 L 460 90" fill="none" stroke={qVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              <text x="470" y="95" className="text-sm font-bold fill-red-600 dark:fill-red-400 font-mono">Q</text>
+              <path d="M 324 90 L 460 90" {...wireProps(qVal)} />
+              <text x="470" y="95" className={signalLabelClass}>Q</text>
 
-              {/* Output Q' */}
-              <path d="M 324 210 L 460 210" fill="none" stroke={qbarVal ? "#ef4444" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
-              <text x="470" y="215" className="text-sm font-bold fill-red-600 dark:fill-red-400 font-mono">Q̅</text>
+              <path d="M 324 210 L 460 210" {...wireProps(qbarVal)} />
+              <text x="470" y="215" className={signalLabelClass}>Q̅</text>
 
             </svg>
           </div>
@@ -183,108 +299,7 @@ export default function SeqFlipFlops() {
       );
     }
 
-    return (
-      <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg w-full overflow-hidden">
-        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Internal Gate-Level Structure</h4>
-        <div className="relative w-full max-w-[400px] h-[200px]">
-          <svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <g id="and-gate">
-                <path d="M 0 0 L 15 0 A 15 15 0 0 1 15 30 L 0 30 Z" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-white dark:text-slate-800" style={{stroke: '#6366f1'}} />
-                <text x="12" y="19" fontSize="10" fontWeight="bold" fill="#4f46e5" className="dark:fill-indigo-400" textAnchor="middle">AND</text>
-              </g>
-              <g id="nand-gate">
-                <path d="M 0 0 L 15 0 A 15 15 0 0 1 15 30 L 0 30 Z" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-white dark:text-slate-800" style={{stroke: '#f59e0b'}} />
-                <circle cx="33" cy="15" r="3" fill="white" stroke="#f59e0b" strokeWidth="2" className="dark:fill-slate-900" />
-                <text x="12" y="19" fontSize="10" fontWeight="bold" fill="#d97706" className="dark:fill-amber-500" textAnchor="middle">NAND</text>
-              </g>
-              <g id="not-gate">
-                <path d="M 0 0 L 20 10 L 0 20 Z" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-white dark:text-slate-800" style={{stroke: '#64748b'}} />
-                <circle cx="23" cy="10" r="3" fill="white" stroke="#64748b" strokeWidth="2" className="dark:fill-slate-900" />
-              </g>
-              <g id="edge-det">
-                <rect x="0" y="0" width="30" height="20" rx="4" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-slate-100 dark:text-slate-800" style={{stroke: '#64748b'}} />
-                <path d="M 10 15 L 15 5 L 20 15" fill="none" stroke="#64748b" strokeWidth="1.5" />
-              </g>
-            </defs>
-
-            {/* Labels */}
-            <text x="10" y="45" fontSize="12" fontFamily="monospace" fontWeight="bold" fill="currentColor" className="text-slate-600 dark:text-slate-400">{getInput1Label()}</text>
-            <text x="10" y="105" fontSize="12" fontFamily="monospace" fontWeight="bold" fill="currentColor" className="text-slate-600 dark:text-slate-400">CLK</text>
-            {getInput2Label() && <text x="10" y="165" fontSize="12" fontFamily="monospace" fontWeight="bold" fill="currentColor" className="text-slate-600 dark:text-slate-400">{getInput2Label()}</text>}
-
-            <text x="380" y="65" fontSize="12" fontFamily="monospace" fontWeight="bold" fill="currentColor" className="text-slate-600 dark:text-slate-400">Q</text>
-            <text x="380" y="145" fontSize="12" fontFamily="monospace" fontWeight="bold" fill="currentColor" className="text-slate-600 dark:text-slate-400">Q'</text>
-
-            {/* Input Wires */}
-            <path d={`M 30 40 L ${ffType === 'D' || ffType === 'T' ? '120' : '120'} 40`} stroke="#94a3b8" strokeWidth="2" fill="none" />
-            <path d="M 40 100 L 70 100" stroke="#94a3b8" strokeWidth="2" fill="none" />
-            {getInput2Label() && <path d="M 30 160 L 120 160" stroke="#94a3b8" strokeWidth="2" fill="none" />}
-
-            {/* D-Flip Flop Inverter */}
-            {ffType === 'D' && (
-              <>
-                <circle cx="70" cy="40" r="3" fill="#94a3b8" />
-                <path d="M 70 40 L 70 150 L 80 150" stroke="#94a3b8" strokeWidth="2" fill="none" />
-                <g transform="translate(80, 140)"><use href="#not-gate" /></g>
-                <path d="M 106 150 L 120 150" stroke="#94a3b8" strokeWidth="2" fill="none" />
-              </>
-            )}
-
-            {/* T-Flip Flop Feedback (Toggles when T=1) */}
-            {ffType === 'T' && (
-              <>
-                {/* Q' to top AND */}
-                <path d="M 320 140 L 340 140 L 340 190 L 100 190 L 100 25 L 120 25" stroke="#94a3b8" strokeWidth="2" fill="none" opacity="0.6" strokeDasharray="4 2" />
-                {/* Q to bottom AND */}
-                <path d="M 320 60 L 360 60 L 360 195 L 90 195 L 90 175 L 120 175" stroke="#94a3b8" strokeWidth="2" fill="none" opacity="0.6" strokeDasharray="4 2" />
-              </>
-            )}
-
-            {/* JK-Flip Flop Feedback */}
-            {ffType === 'JK' && (
-              <>
-                {/* Q' to top AND (J) */}
-                <path d="M 320 140 L 340 140 L 340 190 L 100 190 L 100 25 L 120 25" stroke="#94a3b8" strokeWidth="2" fill="none" opacity="0.6" strokeDasharray="4 2" />
-                <circle cx="320" cy="140" r="3" fill="#94a3b8" />
-                {/* Q to bottom AND (K) */}
-                <path d="M 320 60 L 360 60 L 360 195 L 90 195 L 90 175 L 120 175" stroke="#94a3b8" strokeWidth="2" fill="none" opacity="0.6" strokeDasharray="4 2" />
-                <circle cx="320" cy="60" r="3" fill="#94a3b8" />
-              </>
-            )}
-
-            {/* Clock Edge Detector */}
-            <g transform="translate(70, 90)"><use href="#edge-det" /></g>
-            <path d="M 100 100 L 110 100 L 110 50 L 120 50" stroke="#94a3b8" strokeWidth="2" fill="none" />
-            <path d="M 110 100 L 110 150 L 120 150" stroke="#94a3b8" strokeWidth="2" fill="none" />
-            <circle cx="110" cy="100" r="3" fill="#94a3b8" />
-
-            {/* Pulse Steering AND Gates */}
-            <g transform="translate(120, 30)"><use href="#and-gate" /></g>
-            <g transform="translate(120, 140)"><use href="#and-gate" /></g>
-
-            {/* Steering to Latch Wires */}
-            <path d="M 150 45 L 180 45 L 180 60 L 220 60" stroke="#94a3b8" strokeWidth="2" fill="none" />
-            <path d="M 150 155 L 180 155 L 180 140 L 220 140" stroke="#94a3b8" strokeWidth="2" fill="none" />
-
-            {/* SR Latch (NAND based) */}
-            <g transform="translate(220, 45)"><use href="#nand-gate" /></g>
-            <g transform="translate(220, 125)"><use href="#nand-gate" /></g>
-
-            {/* Latch Cross Coupling */}
-            <path d="M 256 60 L 280 60 L 280 100 L 200 100 L 200 130 L 220 130" stroke="#94a3b8" strokeWidth="2" fill="none" />
-            <path d="M 256 140 L 290 140 L 290 90 L 210 90 L 210 70 L 220 70" stroke="#94a3b8" strokeWidth="2" fill="none" />
-            <circle cx="280" cy="60" r="3" fill="#94a3b8" />
-            <circle cx="290" cy="140" r="3" fill="#94a3b8" />
-
-            {/* Output Wires */}
-            <path d="M 256 60 L 370 60" stroke="#94a3b8" strokeWidth="2" fill="none" />
-            <path d="M 256 140 L 370 140" stroke="#94a3b8" strokeWidth="2" fill="none" />
-
-          </svg>
-        </div>
-      </div>
-    );
+    return null;
   };
 
   return (
@@ -394,7 +409,7 @@ export default function SeqFlipFlops() {
           <div className="relative border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-950 overflow-hidden flex flex-col">
             <div ref={scrollRef} className="overflow-x-auto custom-scrollbar pb-2 scroll-smooth pl-[80px]">
               <div className="h-48 p-2 relative" style={{ minWidth: '600px', width: `${Math.max(600, history.length * 30)}px` }}>
-                <svg width="100%" height="100%" className="overflow-visible">
+                <svg width="100%" height="100%" className="overflow-visible" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
                   {/* Grid */}
                   {Array.from({ length: Math.max(20, history.length) }).map((_, i) => (
                     <line key={i} x1={i * 30} y1="0" x2={i * 30} y2="100%" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1" strokeDasharray="4 4" />
@@ -470,6 +485,22 @@ export default function SeqFlipFlops() {
                       fill="none" stroke="#10b981" strokeWidth="2" 
                     />
                   </g>
+
+                  {/* Hover Overlay Tooltip */}
+                  {hoverIndex !== null && history[hoverIndex] && (
+                    <g transform={`translate(${hoverIndex * 30}, 0)`}>
+                      <line x1={15} y1={0} x2={15} y2="100%" stroke="#94a3b8" strokeDasharray="4 2" strokeWidth={1} />
+                      <g transform={`translate(${hoverIndex * 30 + 100 > Math.max(800, history.length * 30) ? -85 : 20}, 10)`}>
+                        <rect x={0} y={0} width={80} height={getInput2Label() ? 100 : 85} fill="white" className="dark:fill-slate-800 dark:stroke-slate-700" rx={4} stroke="#cbd5e1" strokeWidth={1} filter="drop-shadow(0 4px 3px rgb(0 0 0 / 0.07))" />
+                        <text x={8} y={16} className="text-[10px] font-bold fill-slate-600 dark:fill-slate-300">t = {history[hoverIndex].t}</text>
+                        <text x={8} y={32} className="text-[10px] font-bold fill-amber-600 dark:fill-amber-400">CLK: {history[hoverIndex].clk ? '1' : '0'}</text>
+                        <text x={8} y={48} className="text-[10px] font-bold fill-blue-600 dark:fill-blue-400">{getInput1Label()}: {history[hoverIndex].i1 ? '1' : '0'}</text>
+                        {getInput2Label() && <text x={8} y={64} className="text-[10px] font-bold fill-indigo-600 dark:fill-indigo-400">{getInput2Label()}: {history[hoverIndex].i2 ? '1' : '0'}</text>}
+                        <text x={8} y={getInput2Label() ? 80 : 64} className="text-[10px] font-bold fill-emerald-600 dark:fill-emerald-400">Q:  {history[hoverIndex].q ? '1' : '0'}</text>
+                        <text x={8} y={getInput2Label() ? 96 : 80} className="text-[10px] font-bold fill-emerald-600 dark:fill-emerald-400">Q̅:  {!history[hoverIndex].q ? '1' : '0'}</text>
+                      </g>
+                    </g>
+                  )}
                 </svg>
               </div>
             </div>
