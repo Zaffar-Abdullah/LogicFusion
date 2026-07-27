@@ -131,47 +131,97 @@ export default function SeqMasterSlave() {
              </button>
           </div>
 
-          {/* Block Diagram */}
-          <div className="relative h-48 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center p-4">
-             <div className="flex items-center gap-6">
-                
-                {/* Master */}
-                <div className={`relative w-28 h-28 border-2 rounded-lg flex flex-col items-center justify-center transition-colors ${clock ? 'bg-indigo-100 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'bg-white border-slate-300 dark:bg-slate-900 dark:border-slate-700'}`}>
-                   <span className={`font-bold ${clock ? 'text-indigo-700' : 'text-slate-500'}`}>Master</span>
-                   <span className="text-[10px] text-slate-400">Level-Triggered</span>
-                   {clock && <span className="absolute top-1 text-[8px] bg-indigo-500 text-white px-1 rounded">ACTIVE</span>}
-                   
-                   <div className="absolute -right-4 flex items-center">
-                      <div className="w-4 h-0.5 bg-slate-400"></div>
-                      <span className="absolute -top-4 right-1 text-[10px] font-mono text-indigo-600">Qm={masterQ?'1':'0'}</span>
-                   </div>
-                </div>
+          {/* Block Diagram & Circuit */}
+          <div className="relative w-full bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 flex justify-center overflow-hidden py-8">
+             <div className="w-full max-w-[800px]">
+               <svg viewBox="0 0 800 370" className="w-full h-auto drop-shadow-sm font-sans">
+                 
+                 {/* Background Highlights for Master and Slave */}
+                 <rect x="180" y="50" width="160" height="200" rx="8" fill={clock ? "rgba(99, 102, 241, 0.08)" : "transparent"} stroke={clock ? "rgba(99, 102, 241, 0.4)" : "rgba(148, 163, 184, 0.1)"} strokeWidth="2" strokeDasharray="6 6" className="transition-all duration-300" />
+                 
+                 <rect x="500" y="50" width="160" height="200" rx="8" fill={!clock ? "rgba(16, 185, 129, 0.08)" : "transparent"} stroke={!clock ? "rgba(16, 185, 129, 0.4)" : "rgba(148, 163, 184, 0.1)"} strokeWidth="2" strokeDasharray="6 6" className="transition-all duration-300" />
 
-                {/* Slave */}
-                <div className={`relative w-28 h-28 border-2 rounded-lg flex flex-col items-center justify-center transition-colors ${!clock ? 'bg-emerald-100 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-white border-slate-300 dark:bg-slate-900 dark:border-slate-700'}`}>
-                   <span className={`font-bold ${!clock ? 'text-emerald-700' : 'text-slate-500'}`}>Slave</span>
-                   <span className="text-[10px] text-slate-400">Level-Triggered</span>
-                   {!clock && <span className="absolute top-1 text-[8px] bg-emerald-500 text-white px-1 rounded">ACTIVE</span>}
-                   
-                   <div className="absolute -right-6 flex items-center">
-                      <div className="w-4 h-0.5 bg-slate-400"></div>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 ${slaveQ ? 'bg-amber-100 border-amber-500 text-amber-700' : 'bg-slate-100 border-slate-300 text-slate-500'}`}>{slaveQ ? '1' : '0'}</div>
-                      <span className="ml-1 text-xs font-mono font-bold">Qs</span>
-                   </div>
-                </div>
+                 {/* Master Block */}
+                 <rect x="200" y="80" width="120" height="140" fill="white" stroke={clock ? "#6366f1" : "#64748b"} strokeWidth={clock ? "3" : "2"} className="transition-all duration-300 dark:fill-slate-900" />
+                 <text x="260" y="70" textAnchor="middle" className="text-sm font-bold fill-indigo-600 dark:fill-indigo-400">Master</text>
+                 <text x="215" y="115" className="text-sm font-bold fill-slate-700 dark:fill-slate-300 font-mono">J</text>
+                 <text x="215" y="195" className="text-sm font-bold fill-slate-700 dark:fill-slate-300 font-mono">K</text>
+                 <text x="305" y="115" className="text-sm font-bold fill-slate-700 dark:fill-slate-300 font-mono">Q</text>
+                 <text x="295" y="195" className="text-sm font-bold fill-slate-700 dark:fill-slate-300 font-mono">Q'</text>
 
-             </div>
+                 {/* Slave Block */}
+                 <rect x="520" y="80" width="120" height="140" fill="white" stroke={!clock ? "#10b981" : "#64748b"} strokeWidth={!clock ? "3" : "2"} className="transition-all duration-300 dark:fill-slate-900" />
+                 <text x="580" y="70" textAnchor="middle" className="text-sm font-bold fill-emerald-600 dark:fill-emerald-400">Slave</text>
+                 <text x="535" y="115" className="text-sm font-bold fill-slate-700 dark:fill-slate-300 font-mono">J</text>
+                 <text x="535" y="195" className="text-sm font-bold fill-slate-700 dark:fill-slate-300 font-mono">K</text>
+                 <text x="625" y="115" className="text-sm font-bold fill-slate-700 dark:fill-slate-300 font-mono">Q</text>
+                 <text x="615" y="195" className="text-sm font-bold fill-slate-700 dark:fill-slate-300 font-mono">Q'</text>
 
-             {/* Clock routing */}
-             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-64 h-8 flex items-end">
-                <div className="w-full h-0.5 bg-amber-400 relative">
-                  <div className="absolute -top-4 left-8 text-[10px] font-mono text-amber-600">CLK</div>
-                  <div className="absolute -top-2 left-16 w-0.5 h-2 bg-amber-400"></div>
-                  
-                  {/* Inverter for slave */}
-                  <div className="absolute -top-3 right-16 w-3 h-3 rounded-full border-2 border-amber-400 bg-white"></div>
-                  <div className="absolute -top-2 right-14 w-0.5 h-2 bg-amber-400"></div>
-                </div>
+                 {/* Inputs */}
+                 {/* Set to junction */}
+                 <path d="M 60 110 L 120 110" fill="none" stroke={j ? "#3b82f6" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <text x="25" y="114" className="text-sm font-bold fill-blue-600 dark:fill-blue-400">Set</text>
+                 
+                 {/* Reset to junction */}
+                 <path d="M 60 190 L 140 190" fill="none" stroke={k ? "#3b82f6" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <text x="15" y="194" className="text-sm font-bold fill-blue-600 dark:fill-blue-400">Reset</text>
+
+                 {/* Feedback Slave Q' to Master J junction */}
+                 <path d="M 640 190 L 660 190 L 660 260 L 120 260 L 120 110" fill="none" stroke={slaveQbar ? "#10b981" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <circle cx="120" cy="110" r="3" fill={slaveQbar ? "#10b981" : "#94a3b8"} className="transition-colors duration-300" />
+                 <polygon points="128,256 128,264 120,260" fill={slaveQbar ? "#10b981" : "#94a3b8"} className="transition-colors duration-300" />
+
+                 {/* Feedback Slave Q to Master K junction */}
+                 <path d="M 640 110 L 680 110 L 680 30 L 140 30 L 140 190" fill="none" stroke={slaveQ ? "#10b981" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <circle cx="140" cy="190" r="3" fill={slaveQ ? "#10b981" : "#94a3b8"} className="transition-colors duration-300" />
+                 <polygon points="148,26 148,34 140,30" fill={slaveQ ? "#10b981" : "#94a3b8"} className="transition-colors duration-300" />
+
+                 {/* Junction to Master J */}
+                 <path d="M 120 110 L 200 110" fill="none" stroke={(j && slaveQbar) ? "#6366f1" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <polygon points="190,105 190,115 200,110" fill={(j && slaveQbar) ? "#6366f1" : "#94a3b8"} className="transition-colors duration-300" />
+
+                 {/* Junction to Master K */}
+                 <path d="M 140 190 L 200 190" fill="none" stroke={(k && slaveQ) ? "#6366f1" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <polygon points="190,185 190,195 200,190" fill={(k && slaveQ) ? "#6366f1" : "#94a3b8"} className="transition-colors duration-300" />
+
+                 {/* Master Q to Slave J */}
+                 <path d="M 320 110 L 520 110" fill="none" stroke={masterQ ? "#6366f1" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <polygon points="510,105 510,115 520,110" fill={masterQ ? "#6366f1" : "#94a3b8"} className="transition-colors duration-300" />
+
+                 {/* Master Q' to Slave K */}
+                 <path d="M 320 190 L 520 190" fill="none" stroke={masterQbar ? "#6366f1" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <polygon points="510,185 510,195 520,190" fill={masterQbar ? "#6366f1" : "#94a3b8"} className="transition-colors duration-300" />
+
+                 {/* Output Q */}
+                 <path d="M 640 110 L 740 110" fill="none" stroke={slaveQ ? "#10b981" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 
+                 {/* Output Q' */}
+                 <path d="M 640 190 L 740 190" fill="none" stroke={slaveQbar ? "#10b981" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 
+                 {/* Branch dots for feedback */}
+                 <circle cx="660" cy="190" r="3" fill={slaveQbar ? "#10b981" : "#94a3b8"} className="transition-colors duration-300" />
+                 <circle cx="680" cy="110" r="3" fill={slaveQ ? "#10b981" : "#94a3b8"} className="transition-colors duration-300" />
+
+                 {/* Clock path */}
+                 <text x="35" y="325" className="text-sm font-bold fill-amber-600 dark:fill-amber-500">Clk</text>
+                 <path d="M 60 320 L 380 320" fill="none" stroke={clock ? "#f59e0b" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 
+                 {/* Master Clk branch */}
+                 <path d="M 180 320 L 180 150 L 200 150" fill="none" stroke={clock ? "#f59e0b" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <circle cx="180" cy="320" r="3" fill={clock ? "#f59e0b" : "#94a3b8"} className="transition-colors duration-300" />
+                 <polygon points="190,145 190,155 200,150" fill={clock ? "#f59e0b" : "#94a3b8"} className="transition-colors duration-300" />
+
+                 {/* NOT Gate */}
+                 <path d="M 380 305 L 380 335 L 415 320 Z" fill="white" stroke={clock ? "#f59e0b" : "#94a3b8"} strokeWidth="2" className="transition-colors duration-300 dark:fill-slate-900" />
+                 <circle cx="419" cy="320" r="4" fill="white" stroke={!clock ? "#f59e0b" : "#94a3b8"} strokeWidth="2" className="transition-colors duration-300 dark:fill-slate-900" />
+                 
+                 {/* Slave Clk branch */}
+                 <path d="M 423 320 L 480 320 L 480 150 L 520 150" fill="none" stroke={!clock ? "#f59e0b" : "#94a3b8"} strokeWidth="2.5" className="transition-colors duration-300" />
+                 <polygon points="510,145 510,155 520,150" fill={!clock ? "#f59e0b" : "#94a3b8"} className="transition-colors duration-300" />
+
+                 {/* Title */}
+                 <text x="400" y="360" textAnchor="middle" className="text-sm font-bold fill-emerald-600 dark:fill-emerald-500">Master-slave JK Flip-Flop</text>
+               </svg>
              </div>
           </div>
         </div>
@@ -186,96 +236,108 @@ export default function SeqMasterSlave() {
             </div>
           </div>
           
-          <div ref={scrollRef} className="flex-1 min-h-[280px] bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-4 overflow-x-auto relative custom-scrollbar scroll-smooth">
-             <div style={{ minWidth: '600px', width: `${Math.max(600, history.length * 30)}px` }} className="h-full relative">
-               <svg width="100%" height="100%">
-                  {/* Grid Lines */}
-                  {Array.from({ length: Math.max(20, history.length) }).map((_, i) => (
-                    <line key={i} x1={i * 30} y1="0" x2={i * 30} y2="100%" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1" strokeDasharray="4 4" />
-                  ))}
+          <div className="relative border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-950 overflow-hidden flex flex-col">
+            <div ref={scrollRef} className="flex-1 min-h-[280px] p-4 pl-[140px] overflow-x-auto relative custom-scrollbar scroll-smooth">
+               <div style={{ minWidth: '600px', width: `${Math.max(600, history.length * 30)}px` }} className="h-full relative">
+                 <svg width="100%" height="100%" className="overflow-visible">
+                    {/* Grid Lines */}
+                    {Array.from({ length: Math.max(20, history.length) }).map((_, i) => (
+                      <line key={i} x1={i * 30} y1="0" x2={i * 30} y2="100%" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1" strokeDasharray="4 4" />
+                    ))}
 
-                  {/* Clock Regions Highlighting */}
-                  {history.map((h, i) => (
-                    <rect 
-                      key={`bg-${i}`} 
-                      x={i * 30} 
-                      y="0" 
-                      width={30} 
-                      height="100%" 
-                      fill={h.clk ? "rgba(99, 102, 241, 0.05)" : "rgba(16, 185, 129, 0.05)"} 
-                      className="transition-colors duration-200"
-                    />
-                  ))}
-                  
-                  {/* CLK */}
-                  <g transform="translate(0, 30)">
-                    <text x="5" y="-10" fontSize="12" fill="#f59e0b" fontFamily="monospace" fontWeight="bold">Clock</text>
-                    <path 
-                      d={history.map((h, i) => {
-                        const prevClk = i > 0 ? history[i-1].clk : h.clk;
-                        const x1 = i * 30;
-                        const x2 = (i + 1) * 30;
-                        const y1 = prevClk ? 0 : 25;
-                        const y2 = h.clk ? 0 : 25;
-                        if (y1 !== y2) {
-                          return `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}`;
+                    {/* Clock Regions Highlighting */}
+                    {history.map((h, i) => (
+                      <rect 
+                        key={`bg-${i}`} 
+                        x={i * 30} 
+                        y="0" 
+                        width={30} 
+                        height="100%" 
+                        fill={h.clk ? "rgba(99, 102, 241, 0.05)" : "rgba(16, 185, 129, 0.05)"} 
+                        className="transition-colors duration-200"
+                      />
+                    ))}
+                    
+                    {/* CLK */}
+                    <g transform="translate(0, 30)">
+                      <path 
+                        d={history.map((h, i) => {
+                          const prevClk = i > 0 ? history[i-1].clk : h.clk;
+                          const x1 = i * 30;
+                          const x2 = (i + 1) * 30;
+                          const y1 = prevClk ? 0 : 25;
+                          const y2 = h.clk ? 0 : 25;
+                          if (y1 !== y2) {
+                            return `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}`;
+                          }
+                          return `M ${x1} ${y2} L ${x2} ${y2}`;
+                        }).join(' ')}
+                        fill="none" stroke="#f59e0b" strokeWidth="2.5" 
+                      />
+                      {/* Clock Edge Arrows */}
+                      {history.map((h, i) => {
+                        if (i === 0) return null;
+                        const prevClk = history[i-1].clk;
+                        if (!prevClk && h.clk) {
+                          return <polygon key={`up-${i}`} points={`${i*30},0 ${i*30 - 4},5 ${i*30 + 4},5`} fill="#6366f1" />;
+                        } else if (prevClk && !h.clk) {
+                          return <polygon key={`down-${i}`} points={`${i*30},25 ${i*30 - 4},20 ${i*30 + 4},20`} fill="#10b981" />;
                         }
-                        return `M ${x1} ${y2} L ${x2} ${y2}`;
-                      }).join(' ')}
-                      fill="none" stroke="#f59e0b" strokeWidth="2.5" 
-                    />
-                    {/* Clock Edge Arrows */}
-                    {history.map((h, i) => {
-                      if (i === 0) return null;
-                      const prevClk = history[i-1].clk;
-                      if (!prevClk && h.clk) {
-                        return <polygon key={`up-${i}`} points={`${i*30},0 ${i*30 - 4},5 ${i*30 + 4},5`} fill="#6366f1" />;
-                      } else if (prevClk && !h.clk) {
-                        return <polygon key={`down-${i}`} points={`${i*30},25 ${i*30 - 4},20 ${i*30 + 4},20`} fill="#10b981" />;
-                      }
-                      return null;
-                    })}
-                  </g>
+                        return null;
+                      })}
+                    </g>
 
-                  {/* Master Qm */}
-                  <g transform="translate(0, 100)">
-                    <text x="5" y="-10" fontSize="12" fill="#6366f1" fontFamily="monospace" fontWeight="bold">Qm (Master)</text>
-                    <path 
-                      d={history.map((h, i) => {
-                        const prevQ = i > 0 ? history[i-1].masterQ : h.masterQ;
-                        const x1 = i * 30;
-                        const x2 = (i + 1) * 30;
-                        const y1 = prevQ ? 0 : 25;
-                        const y2 = h.masterQ ? 0 : 25;
-                        if (y1 !== y2) {
-                          return `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}`;
-                        }
-                        return `M ${x1} ${y2} L ${x2} ${y2}`;
-                      }).join(' ')}
-                      fill="none" stroke="#6366f1" strokeWidth="2.5" 
-                    />
-                  </g>
+                    {/* Master Qm */}
+                    <g transform="translate(0, 100)">
+                      <path 
+                        d={history.map((h, i) => {
+                          const prevQ = i > 0 ? history[i-1].masterQ : h.masterQ;
+                          const x1 = i * 30;
+                          const x2 = (i + 1) * 30;
+                          const y1 = prevQ ? 0 : 25;
+                          const y2 = h.masterQ ? 0 : 25;
+                          if (y1 !== y2) {
+                            return `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}`;
+                          }
+                          return `M ${x1} ${y2} L ${x2} ${y2}`;
+                        }).join(' ')}
+                        fill="none" stroke="#6366f1" strokeWidth="2.5" 
+                      />
+                    </g>
 
-                  {/* Slave Qs */}
-                  <g transform="translate(0, 170)">
-                    <text x="5" y="-10" fontSize="12" fill="#10b981" fontFamily="monospace" fontWeight="bold">Qs (Slave / Output)</text>
-                    <path 
-                      d={history.map((h, i) => {
-                        const prevQ = i > 0 ? history[i-1].slaveQ : h.slaveQ;
-                        const x1 = i * 30;
-                        const x2 = (i + 1) * 30;
-                        const y1 = prevQ ? 0 : 25;
-                        const y2 = h.slaveQ ? 0 : 25;
-                        if (y1 !== y2) {
-                          return `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}`;
-                        }
-                        return `M ${x1} ${y2} L ${x2} ${y2}`;
-                      }).join(' ')}
-                      fill="none" stroke="#10b981" strokeWidth="2.5" 
-                    />
-                  </g>
-                </svg>
-             </div>
+                    {/* Slave Qs */}
+                    <g transform="translate(0, 170)">
+                      <path 
+                        d={history.map((h, i) => {
+                          const prevQ = i > 0 ? history[i-1].slaveQ : h.slaveQ;
+                          const x1 = i * 30;
+                          const x2 = (i + 1) * 30;
+                          const y1 = prevQ ? 0 : 25;
+                          const y2 = h.slaveQ ? 0 : 25;
+                          if (y1 !== y2) {
+                            return `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}`;
+                          }
+                          return `M ${x1} ${y2} L ${x2} ${y2}`;
+                        }).join(' ')}
+                        fill="none" stroke="#10b981" strokeWidth="2.5" 
+                      />
+                    </g>
+                  </svg>
+               </div>
+            </div>
+            
+            {/* Fixed Labels Overlay */}
+            <div className="absolute left-0 top-0 bottom-0 w-[130px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-r border-slate-200 dark:border-slate-800 z-10 pointer-events-none flex flex-col justify-start">
+               <div className="absolute top-[36px] left-4 flex items-center gap-2">
+                 <span className="text-[12px] text-amber-600 dark:text-amber-500 font-mono font-bold">Clock</span>
+               </div>
+               <div className="absolute top-[106px] left-4 flex items-center gap-2">
+                 <span className="text-[12px] text-indigo-600 dark:text-indigo-400 font-mono font-bold">Qm (Master)</span>
+               </div>
+               <div className="absolute top-[176px] left-4 flex items-center gap-2">
+                 <span className="text-[12px] text-emerald-600 dark:text-emerald-500 font-mono font-bold">Qs (Slave)</span>
+               </div>
+            </div>
           </div>
           <div className="mt-4 text-sm text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
             <p className="mb-2"><strong>Timing Analysis Observation:</strong></p>

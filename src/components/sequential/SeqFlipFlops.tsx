@@ -299,89 +299,105 @@ export default function SeqFlipFlops() {
           <h3 className="text-sm font-semibold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-500" /> Timing Diagram (Waveforms)
           </h3>
-          <div ref={scrollRef} className="overflow-x-auto custom-scrollbar pb-2 scroll-smooth">
-            <div className="h-48 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2 relative" style={{ minWidth: '600px', width: `${Math.max(600, history.length * 30)}px` }}>
-              <svg width="100%" height="100%">
-                {/* Grid */}
-                {Array.from({ length: Math.max(20, history.length) }).map((_, i) => (
-                  <line key={i} x1={i * 30} y1="0" x2={i * 30} y2="100%" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1" strokeDasharray="4 4" />
-                ))}
-                
-                {/* CLK */}
-                <g transform="translate(0, 20)">
-                  <text x="5" y="-5" fontSize="10" fill="#f59e0b" fontFamily="monospace" fontWeight="bold">CLK</text>
-                  <path 
-                    d={history.map((h, i) => {
-                      const prevClk = i > 0 ? history[i-1].clk : h.clk;
-                      const x1 = i * 30;
-                      const x2 = (i + 1) * 30;
-                      const y1 = prevClk ? 0 : 15;
-                      const y2 = h.clk ? 0 : 15;
-                      return y1 !== y2 ? `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}` : `M ${x1} ${y2} L ${x2} ${y2}`;
-                    }).join(' ')}
-                    fill="none" stroke="#f59e0b" strokeWidth="1.5" 
-                  />
-                  {/* Highlight positive edges since it's positive edge triggered */}
-                  {history.map((h, i) => {
-                    if (i === 0) return null;
-                    const prevClk = history[i-1].clk;
-                    if (!prevClk && h.clk) {
-                      return <polygon key={`edge-${i}`} points={`${i*30},0 ${i*30 - 4},4 ${i*30 + 4},4`} fill="#ef4444" />;
-                    }
-                    return null;
-                  })}
-                </g>
-
-                {/* Input 1 */}
-                <g transform="translate(0, 60)">
-                  <text x="5" y="-5" fontSize="10" fill="#3b82f6" fontFamily="monospace" fontWeight="bold">{getInput1Label()}</text>
-                  <path 
-                    d={history.map((h, i) => {
-                      const prevVal = i > 0 ? history[i-1].i1 : h.i1;
-                      const x1 = i * 30;
-                      const x2 = (i + 1) * 30;
-                      const y1 = prevVal ? 0 : 15;
-                      const y2 = h.i1 ? 0 : 15;
-                      return y1 !== y2 ? `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}` : `M ${x1} ${y2} L ${x2} ${y2}`;
-                    }).join(' ')}
-                    fill="none" stroke="#3b82f6" strokeWidth="1.5" 
-                  />
-                </g>
-
-                {/* Input 2 */}
-                {getInput2Label() && (
-                  <g transform="translate(0, 100)">
-                    <text x="5" y="-5" fontSize="10" fill="#6366f1" fontFamily="monospace" fontWeight="bold">{getInput2Label()}</text>
+          <div className="relative border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-950 overflow-hidden flex flex-col">
+            <div ref={scrollRef} className="overflow-x-auto custom-scrollbar pb-2 scroll-smooth pl-[80px]">
+              <div className="h-48 p-2 relative" style={{ minWidth: '600px', width: `${Math.max(600, history.length * 30)}px` }}>
+                <svg width="100%" height="100%" className="overflow-visible">
+                  {/* Grid */}
+                  {Array.from({ length: Math.max(20, history.length) }).map((_, i) => (
+                    <line key={i} x1={i * 30} y1="0" x2={i * 30} y2="100%" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1" strokeDasharray="4 4" />
+                  ))}
+                  
+                  {/* CLK */}
+                  <g transform="translate(0, 20)">
                     <path 
                       d={history.map((h, i) => {
-                        const prevVal = i > 0 ? history[i-1].i2 : h.i2;
+                        const prevClk = i > 0 ? history[i-1].clk : h.clk;
+                        const x1 = i * 30;
+                        const x2 = (i + 1) * 30;
+                        const y1 = prevClk ? 0 : 15;
+                        const y2 = h.clk ? 0 : 15;
+                        return y1 !== y2 ? `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}` : `M ${x1} ${y2} L ${x2} ${y2}`;
+                      }).join(' ')}
+                      fill="none" stroke="#f59e0b" strokeWidth="1.5" 
+                    />
+                    {/* Highlight positive edges since it's positive edge triggered */}
+                    {history.map((h, i) => {
+                      if (i === 0) return null;
+                      const prevClk = history[i-1].clk;
+                      if (!prevClk && h.clk) {
+                        return <polygon key={`edge-${i}`} points={`${i*30},0 ${i*30 - 4},4 ${i*30 + 4},4`} fill="#ef4444" />;
+                      }
+                      return null;
+                    })}
+                  </g>
+
+                  {/* Input 1 */}
+                  <g transform="translate(0, 60)">
+                    <path 
+                      d={history.map((h, i) => {
+                        const prevVal = i > 0 ? history[i-1].i1 : h.i1;
                         const x1 = i * 30;
                         const x2 = (i + 1) * 30;
                         const y1 = prevVal ? 0 : 15;
-                        const y2 = h.i2 ? 0 : 15;
+                        const y2 = h.i1 ? 0 : 15;
                         return y1 !== y2 ? `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}` : `M ${x1} ${y2} L ${x2} ${y2}`;
                       }).join(' ')}
-                      fill="none" stroke="#6366f1" strokeWidth="1.5" 
+                      fill="none" stroke="#3b82f6" strokeWidth="1.5" 
                     />
                   </g>
-                )}
 
-                {/* Output Q */}
-                <g transform={`translate(0, ${getInput2Label() ? 140 : 100})`}>
-                  <text x="5" y="-5" fontSize="10" fill="#10b981" fontFamily="monospace" fontWeight="bold">Q</text>
-                  <path 
-                    d={history.map((h, i) => {
-                      const prevQ = i > 0 ? history[i-1].q : h.q;
-                      const x1 = i * 30;
-                      const x2 = (i + 1) * 30;
-                      const y1 = prevQ ? 0 : 15;
-                      const y2 = h.q ? 0 : 15;
-                      return y1 !== y2 ? `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}` : `M ${x1} ${y2} L ${x2} ${y2}`;
-                    }).join(' ')}
-                    fill="none" stroke="#10b981" strokeWidth="2" 
-                  />
-                </g>
-              </svg>
+                  {/* Input 2 */}
+                  {getInput2Label() && (
+                    <g transform="translate(0, 100)">
+                      <path 
+                        d={history.map((h, i) => {
+                          const prevVal = i > 0 ? history[i-1].i2 : h.i2;
+                          const x1 = i * 30;
+                          const x2 = (i + 1) * 30;
+                          const y1 = prevVal ? 0 : 15;
+                          const y2 = h.i2 ? 0 : 15;
+                          return y1 !== y2 ? `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}` : `M ${x1} ${y2} L ${x2} ${y2}`;
+                        }).join(' ')}
+                        fill="none" stroke="#6366f1" strokeWidth="1.5" 
+                      />
+                    </g>
+                  )}
+
+                  {/* Output Q */}
+                  <g transform={`translate(0, ${getInput2Label() ? 140 : 100})`}>
+                    <path 
+                      d={history.map((h, i) => {
+                        const prevQ = i > 0 ? history[i-1].q : h.q;
+                        const x1 = i * 30;
+                        const x2 = (i + 1) * 30;
+                        const y1 = prevQ ? 0 : 15;
+                        const y2 = h.q ? 0 : 15;
+                        return y1 !== y2 ? `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}` : `M ${x1} ${y2} L ${x2} ${y2}`;
+                      }).join(' ')}
+                      fill="none" stroke="#10b981" strokeWidth="2" 
+                    />
+                  </g>
+                </svg>
+              </div>
+            </div>
+            
+            {/* Fixed Labels Overlay */}
+            <div className="absolute left-0 top-0 bottom-0 w-[70px] bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-sm border-r border-slate-200 dark:border-slate-800 z-10 pointer-events-none flex flex-col justify-start">
+               <div className="absolute top-[24px] left-4 flex items-center gap-2">
+                 <span className="text-[12px] text-amber-500 font-mono font-bold">CLK</span>
+               </div>
+               <div className="absolute top-[64px] left-4 flex items-center gap-2">
+                 <span className="text-[12px] text-blue-500 font-mono font-bold">{getInput1Label()}</span>
+               </div>
+               {getInput2Label() && (
+                 <div className="absolute top-[104px] left-4 flex items-center gap-2">
+                   <span className="text-[12px] text-indigo-500 font-mono font-bold">{getInput2Label()}</span>
+                 </div>
+               )}
+               <div className={`absolute left-4 flex items-center gap-2 ${getInput2Label() ? 'top-[144px]' : 'top-[104px]'}`}>
+                 <span className="text-[12px] text-emerald-500 font-mono font-bold">Q</span>
+               </div>
             </div>
           </div>
         </div>
