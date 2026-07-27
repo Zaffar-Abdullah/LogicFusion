@@ -248,6 +248,7 @@ const CustomWireEdge = ({
   style = {},
   markerEnd,
   selected,
+  data,
 }: any) => {
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
@@ -287,6 +288,7 @@ const CustomWireEdge = ({
           targetHandle: null,
           type: 'custom',
           animated: true,
+          data: { value: data?.value || false, floating: false }
         },
         {
           id: `e_${junctionId}_${target}`,
@@ -296,14 +298,18 @@ const CustomWireEdge = ({
           targetHandle: targetHandleId,
           type: 'custom',
           animated: true,
+          data: { value: data?.value || false, floating: false }
         },
       ]);
     });
   };
 
+  const strokeColor = data?.floating ? '#ef4444' : data?.value ? '#10b981' : '#94a3b8';
+  const strokeWidth = data?.value ? 3 : 2;
+
   return (
     <>
-      <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={style} interactionWidth={20} />
+      <BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={{ ...style, stroke: strokeColor, strokeWidth }} interactionWidth={20} />
       <EdgeLabelRenderer>
         <div
           style={{
@@ -477,7 +483,7 @@ function CircuitBuilderInner() {
   const onNodesChange = useCallback((changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)), []);
   const onEdgesChange = useCallback((changes: EdgeChange[]) => setEdges((eds) => applyEdgeChanges(changes, eds)), []);
   
-  const onConnect = useCallback((connection: Connection) => setEdges((eds) => addEdge({ ...connection, type: 'custom', animated: true }, eds)), []);
+  const onConnect = useCallback((connection: Connection) => setEdges((eds) => addEdge({ ...connection, type: 'custom', animated: true, data: { value: false, floating: false } }, eds)), []);
   const onReconnect = useCallback((oldEdge: Edge, newConnection: Connection) => setEdges((els) => reconnectEdge(oldEdge, newConnection, els)), []);
 
   const onEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
@@ -732,6 +738,32 @@ function CircuitBuilderInner() {
              }
          }
       });
+
+      // Update edge states for dynamic coloring
+      let edgesChanged = false;
+      const newEdges = [...currentEdges];
+      newEdges.forEach((edge, index) => {
+          const sourceNode = nodeMap.get(edge.source);
+          let val = false;
+          let floating = !sourceNode;
+          if (sourceNode) {
+              if (sourceNode.type === 'flipFlopNode') {
+                  val = edge.sourceHandle === 'qbar' ? sourceNode.data.qbar : sourceNode.data.q;
+              } else if (sourceNode.type === 'icNode') {
+                  val = sourceNode.data[edge.sourceHandle || ''] || false;
+              } else {
+                  val = sourceNode.data.value || false;
+              }
+          }
+          if (edge.data?.value !== val || edge.data?.floating !== floating) {
+              newEdges[index] = { ...edge, data: { ...edge.data, value: val, floating } };
+              edgesChanged = true;
+          }
+      });
+
+      if (edgesChanged) {
+        setEdges(newEdges);
+      }
 
       if (nodesChanged) {
         setNodes(currentNodes);
