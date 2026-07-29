@@ -96,10 +96,11 @@ export default function SeqLatches() {
             </div>
           </div>
 
-          <div className="relative h-72 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden flex items-center justify-center p-4">
+          <div className="relative h-72 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden flex items-center justify-center p-4 shadow-inner">
+            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.02]" style={{ backgroundImage: 'linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
             
             {/* Proper SVG Circuit Diagram */}
-            <div className="relative flex items-center justify-between w-full max-w-lg h-56">
+            <div className="relative flex items-center justify-between w-full max-w-lg h-56 z-10">
               
               {/* Inputs */}
               <div className="flex flex-col justify-between h-full w-24 py-4 z-10 relative">
@@ -139,34 +140,34 @@ export default function SeqLatches() {
                   <defs>
                     {/* NAND Gate Symbol */}
                     <g id="nand-gate">
-                      <path d="M 0 0 L 30 0 A 30 30 0 0 1 30 60 L 0 60 Z" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-indigo-100 dark:text-indigo-900/60" style={{stroke: '#6366f1'}} />
-                      <circle cx="66" cy="30" r="6" fill="white" stroke="#6366f1" strokeWidth="2" className="dark:fill-slate-900" />
+                      <path d="M 0 0 L 30 0 A 30 30 0 0 1 30 60 L 0 60 Z" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-indigo-100 dark:text-indigo-900/40" style={{stroke: '#6366f1'}} />
+                      <circle cx="66" cy="30" r="6" fill="white" stroke="#6366f1" strokeWidth="2" className="dark:fill-slate-950" />
                       <text x="25" y="34" fontSize="14" fontWeight="bold" fill="#4f46e5" className="dark:fill-indigo-400" textAnchor="middle">NAND</text>
                     </g>
                     
                     {/* NOR Gate Symbol */}
                     <g id="nor-gate">
-                      <path d="M 0 0 C 15 0 25 15 25 30 C 25 45 15 60 0 60 C 10 45 10 15 0 0" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-indigo-100 dark:text-indigo-900/60" style={{stroke: '#6366f1'}} />
-                      <path d="M 0 0 C 40 0 60 30 60 30 C 60 30 40 60 0 60 C 10 45 10 15 0 0" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-indigo-100 dark:text-indigo-900/60" style={{stroke: '#6366f1'}} />
-                      <circle cx="66" cy="30" r="6" fill="white" stroke="#6366f1" strokeWidth="2" className="dark:fill-slate-900" />
+                      <path d="M 0 0 C 15 0 25 15 25 30 C 25 45 15 60 0 60 C 10 45 10 15 0 0" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-indigo-100 dark:text-indigo-900/40" style={{stroke: '#6366f1'}} />
+                      <path d="M 0 0 C 40 0 60 30 60 30 C 60 30 40 60 0 60 C 10 45 10 15 0 0" fill="currentColor" stroke="currentColor" strokeWidth="2" className="text-indigo-100 dark:text-indigo-900/40" style={{stroke: '#6366f1'}} />
+                      <circle cx="66" cy="30" r="6" fill="white" stroke="#6366f1" strokeWidth="2" className="dark:fill-slate-950" />
                       <text x="28" y="34" fontSize="12" fontWeight="bold" fill="#4f46e5" className="dark:fill-indigo-400" textAnchor="middle">NOR</text>
                     </g>
                   </defs>
 
                   {/* Top Input Wire (S/R) */}
-                  <path d="M 80 46 L 190 46" stroke={s ? "#10b981" : "#94a3b8"} strokeWidth="3" fill="none" className="transition-all duration-300" />
+                  <path d="M 80 46 L 190 46" fill="none" stroke={s ? "#10b981" : "#64748b"} strokeWidth={s ? 3 : 2} style={{ filter: s ? 'drop-shadow(0 0 3px rgba(16, 185, 129, 0.6))' : 'none' }} className="transition-all duration-300 ease-in-out" />
                   
                   {/* Bottom Input Wire (R/S) */}
-                  <path d="M 80 178 L 190 178" stroke={r ? "#10b981" : "#94a3b8"} strokeWidth="3" fill="none" className="transition-all duration-300" />
+                  <path d="M 80 178 L 190 178" fill="none" stroke={r ? "#10b981" : "#64748b"} strokeWidth={r ? 3 : 2} style={{ filter: r ? 'drop-shadow(0 0 3px rgba(16, 185, 129, 0.6))' : 'none' }} className="transition-all duration-300 ease-in-out" />
 
                   {/* Feedback Wires */}
                   {/* Q' to Top Gate Input 2 */}
-                  <path d="M 330 162 L 350 162 L 350 112 L 150 112 L 150 78 L 190 78" stroke={qBar ? "#f59e0b" : "#94a3b8"} strokeWidth="3" fill="none" opacity="0.8" className="transition-all duration-300" />
-                  <circle cx="330" cy="162" r="4" fill={qBar ? "#f59e0b" : "#94a3b8"} className="transition-all duration-300" />
+                  <path d="M 330 162 L 350 162 L 350 112 L 150 112 L 150 78 L 190 78" fill="none" stroke={qBar ? "#f59e0b" : "#64748b"} strokeWidth={qBar ? 3 : 2} style={{ filter: qBar ? 'drop-shadow(0 0 3px rgba(245, 158, 11, 0.6))' : 'none' }} className="transition-all duration-300 ease-in-out" />
+                  <circle cx="330" cy="162" r="4" fill={qBar ? "#f59e0b" : "#64748b"} style={{ filter: qBar ? 'drop-shadow(0 0 3px rgba(245, 158, 11, 0.6))' : 'none' }} className="transition-all duration-300 ease-in-out" />
 
                   {/* Q to Bottom Gate Input 1 */}
-                  <path d="M 330 62 L 370 62 L 370 112 L 170 112 L 170 146 L 190 146" stroke={q ? "#f59e0b" : "#94a3b8"} strokeWidth="3" fill="none" opacity="0.8" className="transition-all duration-300" />
-                  <circle cx="330" cy="62" r="4" fill={q ? "#f59e0b" : "#94a3b8"} className="transition-all duration-300" />
+                  <path d="M 330 62 L 370 62 L 370 112 L 170 112 L 170 146 L 190 146" fill="none" stroke={q ? "#f59e0b" : "#64748b"} strokeWidth={q ? 3 : 2} style={{ filter: q ? 'drop-shadow(0 0 3px rgba(245, 158, 11, 0.6))' : 'none' }} className="transition-all duration-300 ease-in-out" />
+                  <circle cx="330" cy="62" r="4" fill={q ? "#f59e0b" : "#64748b"} style={{ filter: q ? 'drop-shadow(0 0 3px rgba(245, 158, 11, 0.6))' : 'none' }} className="transition-all duration-300 ease-in-out" />
 
                   {/* Gates */}
                   <g transform="translate(190, 32)">
@@ -179,10 +180,10 @@ export default function SeqLatches() {
 
                   {/* Output Wires */}
                   {/* Top Gate Output (Q) */}
-                  <path d="M 262 62 L 420 62" stroke={q ? "#f59e0b" : "#94a3b8"} strokeWidth="3" fill="none" className="transition-all duration-300" />
+                  <path d="M 262 62 L 420 62" fill="none" stroke={q ? "#f59e0b" : "#64748b"} strokeWidth={q ? 3 : 2} style={{ filter: q ? 'drop-shadow(0 0 3px rgba(245, 158, 11, 0.6))' : 'none' }} className="transition-all duration-300 ease-in-out" />
                   
                   {/* Bottom Gate Output (Q') */}
-                  <path d="M 262 162 L 420 162" stroke={qBar ? "#f59e0b" : "#94a3b8"} strokeWidth="3" fill="none" className="transition-all duration-300" />
+                  <path d="M 262 162 L 420 162" fill="none" stroke={qBar ? "#f59e0b" : "#64748b"} strokeWidth={qBar ? 3 : 2} style={{ filter: qBar ? 'drop-shadow(0 0 3px rgba(245, 158, 11, 0.6))' : 'none' }} className="transition-all duration-300 ease-in-out" />
 
                 </svg>
               </div>
