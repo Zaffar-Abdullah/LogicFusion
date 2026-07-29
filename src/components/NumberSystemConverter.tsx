@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRightLeft, Cpu, AlertTriangle, Layers, Zap } from 'lucide-react';
+import { renderStepByStepBreakdown } from './ConversionStepRenderer';
 
 type BaseType = 2 | 8 | 10 | 16;
 const BASES = [
@@ -89,7 +90,7 @@ export default function NumberSystemConverter() {
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-lg shadow-sm h-full flex flex-col gap-6 overflow-y-auto custom-scrollbar">
       <div>
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-white">Number System Converter & Logic Simulator</h2>
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-white">Number Systems & Logic Simulator</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">Convert numbers with step-by-step breakdowns and apply bitwise logic.</p>
       </div>
 
@@ -223,95 +224,7 @@ export default function NumberSystemConverter() {
             
             {isValid ? (
               <div className="space-y-3 font-mono text-xs text-slate-600 dark:text-slate-400 max-h-64 overflow-y-auto custom-scrollbar pr-2">
-                <div className="p-3 bg-white dark:bg-slate-950 rounded border border-slate-100 dark:border-slate-800 shadow-sm">
-                  {inputBase !== 10 ? (
-                    <>
-                      <div className="font-semibold text-indigo-600 dark:text-indigo-400 mb-1">Step 1: Convert Base {inputBase} to Decimal (Base 10)</div>
-                      <div className="text-[11px] mb-2 leading-relaxed">
-                        Multiply each digit by {inputBase} raised to its positional power, from right to left:
-                      </div>
-                      <div className="bg-slate-50 dark:bg-slate-900 p-2 rounded text-[11px] overflow-x-auto whitespace-nowrap mb-2">
-                        {inputValue.split('').reverse().map((digit, i) => {
-                          const val = parseInt(digit, inputBase);
-                          return (
-                            <span key={i}>
-                              {val} &times; {inputBase}<sup>{i}</sup>
-                              {i < inputValue.length - 1 ? ' + ' : ''}
-                            </span>
-                          );
-                        }).reverse()}
-                      </div>
-                      <div>
-                        = <span className="font-bold text-slate-800 dark:text-slate-200">{decimalValue}</span>
-                      </div>
-                    </>
-                  ) : (
-                     <>
-                      <div className="font-semibold text-indigo-600 dark:text-indigo-400 mb-1">Step 1: Convert to Decimal (Base 10)</div>
-                      <div>Input is already in Decimal (Base 10): <span className="font-bold text-slate-800 dark:text-slate-200">{decimalValue}</span></div>
-                    </>
-                  )}
-                </div>
-                
-                {outputBase !== 10 ? (
-                  <div className="p-3 bg-white dark:bg-slate-950 rounded border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <div className="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">Step 2: Convert Decimal to Base {outputBase}</div>
-                    <div className="text-[11px] mb-2">Repeatedly divide the decimal number by {outputBase} and keep track of the remainders.</div>
-                    <table className="w-full text-left bg-slate-50 dark:bg-slate-900 rounded">
-                      <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500">
-                        <tr>
-                          <th className="py-1 px-2">Value</th>
-                          <th className="py-1 px-2">÷ {outputBase}</th>
-                          <th className="py-1 px-2 text-right">Remainder</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(() => {
-                          let steps = [];
-                          let curr = decimalValue;
-                          if (curr === 0) {
-                            steps.push(
-                              <tr key={0}>
-                                <td className="py-1 px-2">0</td>
-                                <td className="py-1 px-2">0</td>
-                                <td className="py-1 px-2 text-right text-indigo-500 font-bold">0</td>
-                              </tr>
-                            );
-                          } else {
-                            let k = 0;
-                            while (curr > 0) {
-                              let q = Math.floor(curr / outputBase);
-                              let r = curr % outputBase;
-                              let displayR = r.toString(outputBase).toUpperCase();
-                              steps.push(
-                                <tr key={k++} className="border-b border-slate-200 dark:border-slate-800/50 last:border-0">
-                                  <td className="py-1 px-2">{curr}</td>
-                                  <td className="py-1 px-2">{q}</td>
-                                  <td className="py-1 px-2 text-right text-indigo-500 font-bold">{displayR}</td>
-                                </tr>
-                              );
-                              curr = q;
-                            }
-                          }
-                          return steps;
-                        })()}
-                      </tbody>
-                    </table>
-                    <div className="mt-2 text-[11px] text-slate-700 dark:text-slate-300 font-medium">
-                      Read the remainders from <span className="text-indigo-500 font-bold">bottom to top</span> to get the final result.
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-3 bg-white dark:bg-slate-950 rounded border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <div className="font-semibold text-indigo-600 dark:text-indigo-400 mb-1">Step 2: Convert to Target Base</div>
-                    <div className="text-[11px]">Since the target base is 10, no further conversion is needed.</div>
-                  </div>
-                )}
-                
-                <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded border border-indigo-100 dark:border-indigo-800/50 shadow-sm text-center">
-                  <div className="font-semibold text-indigo-700 dark:text-indigo-400 mb-1 text-[10px] uppercase tracking-wider">Final Result</div>
-                  <div className="text-lg text-indigo-900 dark:text-indigo-300 font-bold tracking-widest">{convertedOutput} <sub className="text-xs font-normal text-indigo-600 dark:text-indigo-400">({outputBase})</sub></div>
-                </div>
+                {renderStepByStepBreakdown(inputValue, inputBase, outputBase, decimalValue, convertedOutput)}
               </div>
             ) : (
               <div className="text-sm text-slate-500 italic p-4 text-center">

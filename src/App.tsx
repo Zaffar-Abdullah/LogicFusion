@@ -30,7 +30,7 @@ const LogoImage = ({ className, alt }: { className?: string; alt?: string }) => 
 
 export default function App() {
   const [isStarted, setIsStarted] = useState(false);
-  const [activeTab, setActiveTab] = useState<'converter' | 'circuit' | 'linecoding' | 'sequential'>('sequential');
+  const [activeTab, setActiveTab] = useState<'converter' | 'circuit' | 'linecoding' | 'sequential'>('converter');
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   return (
@@ -64,7 +64,7 @@ export default function App() {
                   Logic<span className="text-blue-600 dark:text-blue-500">Fusion</span>
                 </h1>
                 <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 uppercase tracking-widest font-semibold mb-12 text-center max-w-md">
-                  Digital Architecture Simulator
+                  Digital Systems & Logic Lab
                 </p>
 
                 <motion.button
@@ -96,7 +96,7 @@ export default function App() {
                     <h1 className="text-xl font-bold text-slate-800 dark:text-white leading-none tracking-tight">
                       Logic<span className="text-blue-600 dark:text-blue-500">Fusion</span>
                     </h1>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-semibold mt-1">Digital Architecture Simulator</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-semibold mt-1">Digital Systems & Logic Lab</p>
                   </div>
                 </div>
                 
@@ -109,7 +109,7 @@ export default function App() {
                       }`}
                     >
                       <Zap className="h-3.5 w-3.5" />
-                      <span className="hidden md:inline">Converter & Logic</span>
+                      <span className="hidden md:inline">Number Systems & Logic</span>
                     </button>
                     <button
                       onClick={() => setActiveTab('sequential')}
@@ -127,7 +127,7 @@ export default function App() {
                       }`}
                     >
                       <Cpu className="h-3.5 w-3.5" />
-                      <span className="hidden md:inline">Circuit Builder</span>
+                      <span className="hidden md:inline">Combinational Circuits</span>
                     </button>
                     <button
                       onClick={() => setActiveTab('linecoding')}
@@ -136,7 +136,7 @@ export default function App() {
                       }`}
                     >
                       <Activity className="h-3.5 w-3.5" />
-                      <span className="hidden md:inline">Line Coding</span>
+                      <span className="hidden md:inline">Signal & Line Coding</span>
                     </button>
                   </nav>
                   
